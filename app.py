@@ -16,10 +16,14 @@ st.markdown("""
 <style>
     .main { background-color: #f0f4f8; }
     .stApp { background-color: #f0f4f8; color: #1A1A1A; }
-    h1, h2, h3, h4, p, span, div, label { color: #1A1A1A; }
+    h1, h2, h3, h4 { color: #1A1A1A !important; }
     .stMarkdown p, .stMarkdown h3 { color: #1A1A1A !important; }
-    .stNumberInput label, .stSelectbox label, .stSlider label { color: #1A1A1A !important; font-weight: 600; }
+    .stNumberInput label, .stSelectbox label, .stSlider label, .stTextInput label { color: #1A1A1A !important; font-weight: 600; }
+    .stNumberInput input, .stTextInput input { background-color: #FFFFFF !important; color: #1A1A1A !important; }
+    .stSelectbox div[data-baseweb="select"] > div { background-color: #FFFFFF !important; color: #1A1A1A !important; }
+    .stTabs [data-baseweb="tab-list"] { background-color: white; border-radius: 8px; padding: 4px; }
     .stTabs [data-baseweb="tab"] { color: #1A1A1A !important; font-size: 1rem; font-weight: 600; }
+    .stCaption { color: #546E7A !important; }
     .header-box {
         background: linear-gradient(135deg, #0A2342 0%, #1565C0 100%);
         padding: 2rem 2.5rem;
@@ -27,8 +31,8 @@ st.markdown("""
         margin-bottom: 1.5rem;
         border-bottom: 5px solid #0097A7;
     }
-    .header-box h1 { color: white; margin: 0; font-size: 2.2rem; }
-    .header-box p  { color: #90CAF9; margin: 0.3rem 0 0 0; font-size: 1rem; }
+    .header-box h1 { color: #FFFFFF !important; margin: 0; font-size: 2.2rem; }
+    .header-box p  { color: #90CAF9 !important; margin: 0.3rem 0 0 0; font-size: 1rem; }
     .metric-card {
         background: white;
         border-radius: 10px;
@@ -70,6 +74,8 @@ st.markdown("""
     .stTabs [aria-selected="true"] { color: #0097A7 !important; border-bottom-color: #0097A7 !important; }
     .stCaption { color: #546E7A !important; }
     .stForm { color: #1A1A1A; }
+    .stButton > button { color: white !important; font-weight: 700 !important; }
+    .stFormSubmitButton > button { color: white !important; font-weight: 700 !important; }
 </style>
 """, unsafe_allow_html=True)
 

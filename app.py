@@ -15,7 +15,11 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main { background-color: #f0f4f8; }
-    .stApp { background-color: #f0f4f8; }
+    .stApp { background-color: #f0f4f8; color: #1A1A1A; }
+    h1, h2, h3, h4, p, span, div, label { color: #1A1A1A; }
+    .stMarkdown p, .stMarkdown h3 { color: #1A1A1A !important; }
+    .stNumberInput label, .stSelectbox label, .stSlider label { color: #1A1A1A !important; font-weight: 600; }
+    .stTabs [data-baseweb="tab"] { color: #1A1A1A !important; font-size: 1rem; font-weight: 600; }
     .header-box {
         background: linear-gradient(135deg, #0A2342 0%, #1565C0 100%);
         padding: 2rem 2.5rem;
@@ -57,14 +61,15 @@ st.markdown("""
     }
     .section-header {
         background: #0A2342;
-        color: white;
+        color: white !important;
         padding: 0.5rem 1rem;
         border-radius: 6px;
         font-weight: 700;
         margin: 1rem 0 0.5rem 0;
     }
-    .stTabs [data-baseweb="tab"] { font-size: 1rem; font-weight: 600; }
-    .stTabs [aria-selected="true"] { color: #0097A7; border-bottom-color: #0097A7 !important; }
+    .stTabs [aria-selected="true"] { color: #0097A7 !important; border-bottom-color: #0097A7 !important; }
+    .stCaption { color: #546E7A !important; }
+    .stForm { color: #1A1A1A; }
 </style>
 """, unsafe_allow_html=True)
 

@@ -127,7 +127,7 @@ with c4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2 = st.tabs(["🔍  Predict by House ID", "✏️  Predict by Features"])
+tab1, tab2, tab3 = st.tabs(["🔍  Predict by House ID", "✏️  Predict by Features", "📂  Batch Predict (Upload CSV)"])
 
 # ════════════════════════════════════════════════════════════════════════════
 # TAB 1 — House ID Lookup
@@ -357,6 +357,90 @@ with tab2:
                     <span style="font-weight:700; color:#0A2342">{val}</span>
                 </div>
                 """, unsafe_allow_html=True)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 3 — Batch CSV Upload
+# ════════════════════════════════════════════════════════════════════════════
+with tab3:
+    st.markdown("### Upload a CSV to predict prices for multiple houses at once")
+    st.caption("Upload the Kaggle test.csv or any CSV with the same columns. The model predicts a price for every row.")
+
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+
+    if uploaded_file is not None:
+        try:
+            df_upload = pd.read_csv(uploaded_file)
+            st.success(f"✅ File loaded — {len(df_upload):,} houses, {len(df_upload.columns)} columns")
+
+            with st.expander("👁 Preview uploaded data (first 5 rows)"):
+                st.dataframe(df_upload.head(), use_container_width=True)
+
+            if st.button("🔮 Predict All Houses", use_container_width=True, key="btn_batch"):
+                with st.spinner("Running predictions..."):
+                    df_work = df_upload.copy()
+
+                    # Engineered features
+                    df_work["TotalSF"]          = df_work.get("TotalBsmtSF", pd.Series(0)).fillna(0) + df_work.get("1stFlrSF", pd.Series(0)).fillna(0) + df_work.get("2ndFlrSF", pd.Series(0)).fillna(0)
+                    df_work["TotalBath"]         = df_work.get("FullBath", pd.Series(0)).fillna(0) + 0.5*df_work.get("HalfBath", pd.Series(0)).fillna(0) + df_work.get("BsmtFullBath", pd.Series(0)).fillna(0) + 0.5*df_work.get("BsmtHalfBath", pd.Series(0)).fillna(0)
+                    df_work["HouseAge"]          = df_work.get("YrSold", pd.Series(2008)).fillna(2008) - df_work.get("YearBuilt", pd.Series(1990)).fillna(1990)
+                    df_work["YearsSinceRemodel"] = df_work.get("YrSold", pd.Series(2008)).fillna(2008) - df_work.get("YearRemodAdd", pd.Series(1990)).fillna(1990)
+                    df_work["WasRemodeled"]      = (df_work.get("YearRemodAdd", pd.Series(0)) != df_work.get("YearBuilt", pd.Series(0))).astype(int)
+                    df_work["IsNew"]             = (df_work.get("YrSold", pd.Series(0)) == df_work.get("YearBuilt", pd.Series(0))).astype(int)
+
+                    # Add any missing columns
+                    for col in feature_cols:
+                        if col not in df_work.columns:
+                            df_work[col] = 0
+                    df_work = df_work.fillna(0)
+
+                    # Encode categoricals
+                    for col, le in label_encoders.items():
+                        if col in df_work.columns:
+                            try:
+                                df_work[col] = le.transform(df_work[col].astype(str))
+                            except:
+                                df_work[col] = 0
+
+                    # Predict
+                    X_batch = df_work[feature_cols]
+                    prices = np.expm1(model.predict(X_batch))
+
+                    # Build results table
+                    results = pd.DataFrame()
+                    for c in ["Id", "Neighborhood", "OverallQual", "GrLivArea", "YearBuilt"]:
+                        if c in df_upload.columns:
+                            results[c] = df_upload[c].values
+                    results["Predicted Price"] = [f"${p:,.0f}" for p in prices]
+
+                # Summary cards
+                st.markdown("<br>", unsafe_allow_html=True)
+                ca, cb, cc, cd = st.columns(4)
+                with ca:
+                    st.markdown(f'<div class="metric-card"><div class="value">{len(prices):,}</div><div class="label">Houses Predicted</div></div>', unsafe_allow_html=True)
+                with cb:
+                    st.markdown(f'<div class="metric-card"><div class="value">${np.mean(prices):,.0f}</div><div class="label">Mean Price</div></div>', unsafe_allow_html=True)
+                with cc:
+                    st.markdown(f'<div class="metric-card"><div class="value">${np.min(prices):,.0f}</div><div class="label">Min Price</div></div>', unsafe_allow_html=True)
+                with cd:
+                    st.markdown(f'<div class="metric-card"><div class="value">${np.max(prices):,.0f}</div><div class="label">Max Price</div></div>', unsafe_allow_html=True)
+
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown('<div class="section-header">📋 Prediction Results</div>', unsafe_allow_html=True)
+                st.dataframe(results, use_container_width=True, height=400)
+
+                # Download button
+                st.download_button(
+                    label="⬇️ Download Results as CSV",
+                    data=results.to_csv(index=False),
+                    file_name="group6_predictions.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
+            st.info("Make sure your CSV has the same column names as the Kaggle test.csv")
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("<br><br>", unsafe_allow_html=True)
